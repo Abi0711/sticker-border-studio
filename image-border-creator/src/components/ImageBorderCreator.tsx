@@ -68,25 +68,50 @@ function ImageBorderCreator({Files}:ImageBorderCreatorProps) {
   const [borderColor, setBorderColor] = useState<string>('#ffffff');
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
+  const [currentWidth, setCurrentWidth] = useState<number>();
+  const [currentHeight, setCurrentHeight] = useState<number>();
+
+
 
   const moveLeft = () => {
     if (!Files || Files.length === 0) return;
     setCurrentIndex((prevIndex)=> prevIndex === 0 ? 0 : prevIndex - 1);
+    const img = new Image();
+    img.src = Files[currentIndex];
+      img.onload = () => {
+        setCurrentWidth(img.width)
+        setCurrentHeight(img.height) 
+      }
   }
 
   const moveRight = () => {
     if (!Files || Files.length === 0) return;
     setCurrentIndex((prevIndex)=> prevIndex === Files.length - 1 ? Files.length - 1 : prevIndex + 1);
+    const img = new Image();
+    img.src = Files[currentIndex];
+      img.onload = () => {
+        setCurrentWidth(img.width)
+        setCurrentHeight(img.height) 
+      }
   }
 
   useEffect(() => {
     setCurrentIndex(0);
+    if(Files){
+      const img = new Image();
+      img.src = Files[currentIndex];
+      img.onload = () => {
+        setCurrentWidth(img.width)
+        setCurrentHeight(img.height) 
+      }
+
+    }
   }, [Files]);
 
   useEffect(() => {
     if (!Files || Files.length === 0 || !canvasRef.current) return;
     drawSticker(Files[currentIndex], canvasRef.current, borderWidth, borderColor);
-  }, [Files, currentIndex, borderWidth, borderColor]); //when user input changes uploasded file or border width or colour, execute function
+  }, [Files, currentIndex, borderWidth, borderColor]); //when user input changes uploaded file or border width or colour, execute function
 
   const downloadSticker = () => {
     const canvas = canvasRef.current;
@@ -144,10 +169,17 @@ function ImageBorderCreator({Files}:ImageBorderCreatorProps) {
               Border Color: 
               <input type="color" value={borderColor} onChange={(e) => setBorderColor(e.target.value)} />
             </label>
+            <div className='advanced-options'>
+              <p>image width: {currentWidth}</p>
+              <p>image height: {currentHeight}</p>
+            </div>
+
+
             <button className='download-button' onClick={downloadSticker}>Download PNG</button>
             {Files.length > 1 &&
                 <button className='download-button' onClick={downloadAllStickers}>Apply border to all images and download</button>
             }
+
           </div>
           
           <div className='canvas-container'>
